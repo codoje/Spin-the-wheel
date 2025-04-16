@@ -28,8 +28,10 @@
     }
 
     #result {
-      font-size: 24px;
-      margin-top: 20px;
+      font-size: 26px;
+      margin-top: 30px;
+      font-weight: bold;
+      color: #2c3e50;
     }
   </style>
 </head>
@@ -40,6 +42,9 @@
 <br>
 <button onclick="spin()">SPIN</button>
 <div id="result"></div>
+
+<!-- Confetti library -->
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 <script>
   const canvas = document.getElementById('wheelCanvas');
@@ -59,7 +64,6 @@
       const startAngle = currentAngle + i * anglePerSlice;
       const endAngle = startAngle + anglePerSlice;
 
-      // Slice
       ctx.beginPath();
       ctx.moveTo(radius, radius);
       ctx.arc(radius, radius, radius, startAngle, endAngle);
@@ -91,8 +95,9 @@
   function spin() {
     if (spinning) return;
     spinning = true;
+    document.getElementById('result').textContent = '';
 
-    let spinAngle = Math.random() * 360 + 720; // 2 to 3 full spins
+    let spinAngle = Math.random() * 360 + 720; // 2-3 spins
     let duration = 4000;
     let start = null;
 
@@ -110,11 +115,21 @@
       } else {
         spinning = false;
         const winningIndex = Math.floor((numPrizes - (currentAngle / anglePerSlice)) % numPrizes);
-        document.getElementById('result').textContent = `You won: ${prizes[winningIndex]}!`;
+        const prize = prizes[winningIndex];
+        document.getElementById('result').textContent = `🎉 You won: ${prize}! 🎉`;
+        celebrate();
       }
     }
 
     requestAnimationFrame(animate);
+  }
+
+  function celebrate() {
+    confetti({
+      particleCount: 200,
+      spread: 80,
+      origin: { y: 0.6 }
+    });
   }
 
   function easeOut(t) {
@@ -126,4 +141,5 @@
 
 </body>
 </html>
+
 
