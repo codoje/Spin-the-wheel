@@ -5,54 +5,22 @@
   <title>Spin the Wheel</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       text-align: center;
+      background: #f7f7f7;
+      margin: 0;
+      padding: 0;
+    }
+
+    canvas {
       margin-top: 50px;
-      background: #f0f0f0;
-    }
-
-    .wheel {
-      width: 300px;
-      height: 300px;
-      border-radius: 50%;
-      border: 10px solid #333;
-      position: relative;
-      margin: auto;
-      overflow: hidden;
-      box-shadow: 0 0 20px rgba(0,0,0,0.2);
-      transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
-    }
-
-    .wheel:before {
-      content: "";
-      position: absolute;
-      top: -20px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 0;
-      height: 0;
-      border-left: 15px solid transparent;
-      border-right: 15px solid transparent;
-      border-bottom: 20px solid red;
-      z-index: 10;
-    }
-
-    .segment {
-      width: 50%;
-      height: 50%;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform-origin: 0% 0%;
-      background-color: #fff;
-      border: 1px solid #ccc;
     }
 
     button {
-      margin-top: 30px;
+      margin-top: 20px;
       padding: 15px 30px;
       font-size: 18px;
-      background: #27ae60;
+      background-color: #27ae60;
       color: white;
       border: none;
       border-radius: 8px;
@@ -60,51 +28,102 @@
     }
 
     #result {
-      margin-top: 20px;
       font-size: 24px;
+      margin-top: 20px;
     }
   </style>
 </head>
 <body>
 
-  <h1>Spin the Wheel!</h1>
-  <div class="wheel" id="wheel"></div>
-  <button onclick="spin()">Spin</button>
-  <div id="result"></div>
+<h1>Spin the Wheel!</h1>
+<canvas id="wheelCanvas" width="400" height="400"></canvas>
+<br>
+<button onclick="spin()">SPIN</button>
+<div id="result"></div>
 
-  <script>
-    const prizes = ['Back Scratcher', 'Pickle Pen', 'Potato Pen', 'Stress ball', 'Ice Pack', 'Cooling Towel', 'Mini First-Aid kit',' Scalp Massage tool', 'Travel Hand sanitizer', 'Syringe Pen'];
-    const wheel = document.getElementById('wheel');
-    let currentAngle = 0;
+<script>
+  const canvas = document.getElementById('wheelCanvas');
+  const ctx = canvas.getContext('2d');
+  const prizes = ['Back Scratcher', 'Pickle Pen', 'Potato Pen', 'Stress Ball', 'Ice Pack', 'Cooling towel', 'First aid kit', 'Scalp massager tool', 'Hand Sanitizer', 'Syringe Pen'];
+  const colors = ['#f94144','#f3722c','#f9c74f','#90be6d','#43aa8b','#577590'];
+  const numPrizes = prizes.length;
+  const anglePerSlice = (2 * Math.PI) / numPrizes;
 
-    // Generate the wheel segments
-    function createSegments() {
-      const segmentAngle = 360 / prizes.length;
-      prizes.forEach((prize, index) => {
-        const segment = document.createElement('div');
-        segment.className = 'segment';
-        segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(-${90 - segmentAngle}deg)`;
-        segment.style.backgroundColor = `hsl(${index * segmentAngle}, 70%, 70%)`;
-        segment.innerHTML = `<span style="transform: skewY(${90 - segmentAngle}deg) rotate(${segmentAngle / 2}deg); position: absolute; left: 10px; top: 50%; transform-origin: left center;">${prize}</span>`;
-        wheel.appendChild(segment);
-      });
+  let currentAngle = 0;
+  let spinning = false;
+
+  function drawWheel() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    const radius = canvas.width / 2;
+    for (let i = 0; i < numPrizes; i++) {
+      const startAngle = currentAngle + i * anglePerSlice;
+      const endAngle = startAngle + anglePerSlice;
+
+      // Slice
+      ctx.beginPath();
+      ctx.moveTo(radius, radius);
+      ctx.arc(radius, radius, radius, startAngle, endAngle);
+      ctx.fillStyle = colors[i % colors.length];
+      ctx.fill();
+      ctx.stroke();
+
+      // Text
+      ctx.save();
+      ctx.translate(radius, radius);
+      ctx.rotate(startAngle + anglePerSlice / 2);
+      ctx.textAlign = 'right';
+      ctx.fillStyle = '#fff';
+      ctx.font = 'bold 16px sans-serif';
+      ctx.fillText(prizes[i], radius - 10, 5);
+      ctx.restore();
     }
 
-    createSegments();
+    // Pointer
+    ctx.beginPath();
+    ctx.moveTo(radius - 10, 10);
+    ctx.lineTo(radius + 10, 10);
+    ctx.lineTo(radius, 40);
+    ctx.closePath();
+    ctx.fillStyle = '#e74c3c';
+    ctx.fill();
+  }
 
-    function spin() {
-      const randomIndex = Math.floor(Math.random() * prizes.length);
-      const segmentAngle = 360 / prizes.length;
-      const targetAngle = 360 * 5 + (360 - randomIndex * segmentAngle - segmentAngle / 2);
+  function spin() {
+    if (spinning) return;
+    spinning = true;
 
-      currentAngle += targetAngle;
-      wheel.style.transform = `rotate(${currentAngle}deg)`;
+    let spinAngle = Math.random() * 360 + 720; // 2 to 3 full spins
+    let duration = 4000;
+    let start = null;
 
-      setTimeout(() => {
-        document.getElementById('result').textContent = `You won: ${prizes[randomIndex]}!`;
-      }, 5000);
+    function animate(timestamp) {
+      if (!start) start = timestamp;
+      let progress = timestamp - start;
+      let easing = easeOut(progress / duration);
+      let angle = spinAngle * easing;
+
+      currentAngle = (angle * Math.PI / 180) % (2 * Math.PI);
+      drawWheel();
+
+      if (progress < duration) {
+        requestAnimationFrame(animate);
+      } else {
+        spinning = false;
+        const winningIndex = Math.floor((numPrizes - (currentAngle / anglePerSlice)) % numPrizes);
+        document.getElementById('result').textContent = `You won: ${prizes[winningIndex]}!`;
+      }
     }
-  </script>
+
+    requestAnimationFrame(animate);
+  }
+
+  function easeOut(t) {
+    return (--t) * t * t + 1;
+  }
+
+  drawWheel();
+</script>
 
 </body>
 </html>
+
