@@ -27,21 +27,27 @@
       cursor: pointer;
     }
 
-    #result {
-      font-size: 26px;
-      margin-top: 30px;
-      font-weight: bold;
-      color: #2c3e50;
+    #pointer {
+      position: absolute;
+      top: 65px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 30px solid red;
+      z-index: 10;
     }
   </style>
 </head>
 <body>
 
 <h1>Spin the Wheel!</h1>
+<div id="pointer"></div>
 <canvas id="wheelCanvas" width="400" height="400"></canvas>
 <br>
 <button onclick="spin()">SPIN</button>
-<div id="result"></div>
 
 <!-- Confetti library -->
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
@@ -60,86 +66,5 @@
   function drawWheel() {
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     const radius = canvas.width / 2;
-    for (let i = 0; i < numPrizes; i++) {
-      const startAngle = currentAngle + i * anglePerSlice;
-      const endAngle = startAngle + anglePerSlice;
 
-      ctx.beginPath();
-      ctx.moveTo(radius, radius);
-      ctx.arc(radius, radius, radius, startAngle, endAngle);
-      ctx.fillStyle = colors[i % colors.length];
-      ctx.fill();
-      ctx.stroke();
-
-      // Text
-      ctx.save();
-      ctx.translate(radius, radius);
-      ctx.rotate(startAngle + anglePerSlice / 2);
-      ctx.textAlign = 'right';
-      ctx.fillStyle = '#fff';
-      ctx.font = 'bold 16px sans-serif';
-      ctx.fillText(prizes[i], radius - 10, 5);
-      ctx.restore();
-    }
-
-    // Pointer
-    ctx.beginPath();
-    ctx.moveTo(radius - 10, 10);
-    ctx.lineTo(radius + 10, 10);
-    ctx.lineTo(radius, 40);
-    ctx.closePath();
-    ctx.fillStyle = '#e74c3c';
-    ctx.fill();
-  }
-
-  function spin() {
-    if (spinning) return;
-    spinning = true;
-    document.getElementById('result').textContent = '';
-
-    let spinAngle = Math.random() * 360 + 720; // 2-3 spins
-    let duration = 4000;
-    let start = null;
-
-    function animate(timestamp) {
-      if (!start) start = timestamp;
-      let progress = timestamp - start;
-      let easing = easeOut(progress / duration);
-      let angle = spinAngle * easing;
-
-      currentAngle = (angle * Math.PI / 180) % (2 * Math.PI);
-      drawWheel();
-
-      if (progress < duration) {
-        requestAnimationFrame(animate);
-      } else {
-        spinning = false;
-        const winningIndex = Math.floor((numPrizes - (currentAngle / anglePerSlice)) % numPrizes);
-        const prize = prizes[winningIndex];
-        document.getElementById('result').textContent = `🎉 You won: ${prize}! 🎉`;
-        celebrate();
-      }
-    }
-
-    requestAnimationFrame(animate);
-  }
-
-  function celebrate() {
-    confetti({
-      particleCount: 200,
-      spread: 80,
-      origin: { y: 0.6 }
-    });
-  }
-
-  function easeOut(t) {
-    return (--t) * t * t + 1;
-  }
-
-  drawWheel();
-</script>
-
-</body>
-</html>
-
-
+    for
