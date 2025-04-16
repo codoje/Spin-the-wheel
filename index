@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Spin the Wheel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      margin-top: 50px;
+      background: #f0f0f0;
+    }
+
+    .wheel {
+      width: 300px;
+      height: 300px;
+      border-radius: 50%;
+      border: 10px solid #333;
+      position: relative;
+      margin: auto;
+      overflow: hidden;
+      box-shadow: 0 0 20px rgba(0,0,0,0.2);
+      transition: transform 5s cubic-bezier(0.33, 1, 0.68, 1);
+    }
+
+    .wheel:before {
+      content: "";
+      position: absolute;
+      top: -20px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 0;
+      height: 0;
+      border-left: 15px solid transparent;
+      border-right: 15px solid transparent;
+      border-bottom: 20px solid red;
+      z-index: 10;
+    }
+
+    .segment {
+      width: 50%;
+      height: 50%;
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform-origin: 0% 0%;
+      background-color: #fff;
+      border: 1px solid #ccc;
+    }
+
+    button {
+      margin-top: 30px;
+      padding: 15px 30px;
+      font-size: 18px;
+      background: #27ae60;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    #result {
+      margin-top: 20px;
+      font-size: 24px;
+    }
+  </style>
+</head>
+<body>
+
+  <h1>Spin the Wheel!</h1>
+  <div class="wheel" id="wheel"></div>
+  <button onclick="spin()">Spin</button>
+  <div id="result"></div>
+
+  <script>
+    const prizes = ['Back Scratcher', 'Pickle Pen', 'Potato Pen', 'Stress ball', 'Ice Pack', 'Cooling Towel', 'Mini First-Aid kit',' Scalp Massage tool', 'Travel Hand sanitizer', 'Syringe Pen'];
+    const wheel = document.getElementById('wheel');
+    let currentAngle = 0;
+
+    // Generate the wheel segments
+    function createSegments() {
+      const segmentAngle = 360 / prizes.length;
+      prizes.forEach((prize, index) => {
+        const segment = document.createElement('div');
+        segment.className = 'segment';
+        segment.style.transform = `rotate(${index * segmentAngle}deg) skewY(-${90 - segmentAngle}deg)`;
+        segment.style.backgroundColor = `hsl(${index * segmentAngle}, 70%, 70%)`;
+        segment.innerHTML = `<span style="transform: skewY(${90 - segmentAngle}deg) rotate(${segmentAngle / 2}deg); position: absolute; left: 10px; top: 50%; transform-origin: left center;">${prize}</span>`;
+        wheel.appendChild(segment);
+      });
+    }
+
+    createSegments();
+
+    function spin() {
+      const randomIndex = Math.floor(Math.random() * prizes.length);
+      const segmentAngle = 360 / prizes.length;
+      const targetAngle = 360 * 5 + (360 - randomIndex * segmentAngle - segmentAngle / 2);
+
+      currentAngle += targetAngle;
+      wheel.style.transform = `rotate(${currentAngle}deg)`;
+
+      setTimeout(() => {
+        document.getElementById('result').textContent = `You won: ${prizes[randomIndex]}!`;
+      }, 5000);
+    }
+  </script>
+
+</body>
+</html>
